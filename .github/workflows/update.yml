@@ -3,40 +3,41 @@ name: Update VK Stats
 on:
   schedule:
     - cron: '0 9 * * *'  # Ежедневно в 12:00 по МСК (9:00 UTC)
-  workflow_dispatch: {}   # Правильный формат для ручного запуска
+  workflow_dispatch: {}
 
 jobs:
   update:
     runs-on: ubuntu-latest
     
     steps:
-      # Шаг 1: Получение кода репозитория
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
-      # Шаг 2: Установка Python
+          fetch-depth: 0  # Важно для истории коммитов
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           
-      # Шаг 3: Установка зависимостей
       - name: Install dependencies
         run: pip install -r requirements.txt
         
-      # Шаг 4: Запуск скрипта с секретным ключом
       - name: Run script
         env:
           VK_API_KEY: ${{ secrets.VK_API_KEY }}
         run: python main.py
         
-      # Шаг 5: Фиксация изменений
-      - name: Commit and push changes
+      - name: Commit changes
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add README.md
           git diff --cached --quiet || git commit -m "Автоматическое обновление статистики"
-          git push
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
