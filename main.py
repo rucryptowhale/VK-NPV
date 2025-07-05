@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timedelta
 
 # Конфигурация
-GROUP_ID = "club226396402"  # Используем ID вместо short_name
+GROUP_ID = "226396402"  # Используем числовой ID без "club"
 VK_API_KEY = os.environ["VK_API_KEY"]
 VK_API_VERSION = "5.199"
 
@@ -46,7 +46,7 @@ def get_group_info():
     """Получение основной информации о сообществе"""
     url = "https://api.vk.com/method/groups.getById"
     params = {
-        "group_id": GROUP_ID.replace("club", ""),
+        "group_ids": GROUP_ID,
         "fields": "name,description,members_count,photo_200,activity,site",
         "access_token": VK_API_KEY,
         "v": VK_API_VERSION
