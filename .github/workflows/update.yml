@@ -3,7 +3,7 @@ name: Update VK Stats
 on:
   schedule:
     - cron: '0 9 * * *'  # Ежедневно в 12:00 по МСК (9:00 UTC)
-  workflow_dispatch: true   # Разрешить ручной запуск
+  workflow_dispatch: {}   # Правильный формат для ручного запуска
 
 jobs:
   update:
