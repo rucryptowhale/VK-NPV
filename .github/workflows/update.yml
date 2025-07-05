@@ -3,7 +3,7 @@ name: Update VK Stats
 on:
   schedule:
     - cron: '0 9 * * *'  # Ежедневно в 12:00 по МСК (9:00 UTC)
-  workflow_dispatch:       # Разрешить ручной запуск
+  workflow_dispatch: true   # Разрешить ручной запуск
 
 jobs:
   update:
@@ -13,7 +13,9 @@ jobs:
       # Шаг 1: Получение кода репозитория
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       # Шаг 2: Установка Python
       - name: Set up Python
         uses: actions/setup-python@v4
