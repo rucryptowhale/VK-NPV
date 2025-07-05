@@ -1,0 +1,45 @@
+# Добавьте в конец main.py
+def generate_analytics_svg(stats):
+    """Генерация SVG графика статистики"""
+    svg_content = f"""<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+        <style>
+            .bar {{ fill: #58a6ff; }}
+            .label {{ font: 12px sans-serif; fill: white; }}
+            .title {{ font: 14px sans-serif; fill: #c9d1d9; font-weight: bold; }}
+        </style>
+        <rect width="100%" height="100%" fill="#0d1117" />
+        <text x="200" y="20" text-anchor="middle" class="title">Статистика сообщества</text>
+        
+        <!-- Бар-чарт -->
+        <rect class="bar" x="50" y="180" width="40" height="-{stats.get('reach', 0)/50}" />
+        <text class="label" x="70" y="165" text-anchor="middle">Охват</text>
+        
+        <rect class="bar" x="110" y="180" width="40" height="-{stats.get('visitors', 0)/30}" />
+        <text class="label" x="130" y="165" text-anchor="middle">Посетители</text>
+        
+        <rect class="bar" x="170" y="180" width="40" height="-{stats.get('views', 0)/20}" />
+        <text class="label" x="190" y="165" text-anchor="middle">Просмотры</text>
+        
+        <rect class="bar" x="230" y="180" width="40" height="-{stats.get('likes', 0)}" />
+        <text class="label" x="250" y="165" text-anchor="middle">Лайки</text>
+        
+        <rect class="bar" x="290" y="180" width="40" height="-{stats.get('shares', 0)}" />
+        <text class="label" x="310" y="165" text-anchor="middle">Репосты</text>
+    </svg>"""
+    
+    with open("analytics.svg", "w") as f:
+        f.write(svg_content)
+
+# И добавьте вызов в main блок
+if __name__ == "__main__":
+    group_info = get_group_info()
+    group_stats = get_group_stats()
+    
+    # Генерация README
+    with open("README.md", "w", encoding="utf-8") as f:
+        f.write(generate_readme(group_info, group_stats))
+    
+    # Генерация графика (опционально)
+    generate_analytics_svg(group_stats)
+    
+    print("README успешно обновлен!")
