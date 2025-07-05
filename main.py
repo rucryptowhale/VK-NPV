@@ -1,68 +1,5 @@
-import os
-import requests
-from datetime import datetime, timedelta
-
-# Конфигурация
-GROUP_ID = "226396402"  # Используем числовой ID без "club"
-VK_API_KEY = os.environ["VK_API_KEY"]
-VK_API_VERSION = "5.199"
-
-def get_group_stats():
-    """Получение статистики сообщества за последний день"""
-    url = "https://api.vk.com/method/stats.get"
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    
-    params = {
-        "group_id": GROUP_ID,
-        "date_from": yesterday,
-        "date_to": yesterday,
-        "access_token": VK_API_KEY,
-        "v": VK_API_VERSION
-    }
-    try:
-        response = requests.get(url, params=params).json()
-        if 'error' in response:
-            print(f"Ошибка VK API: {response['error']['error_msg']}")
-            return {}
-        
-        # Обработка случая, когда статистика еще не сформирована
-        if not response.get('response') or not response['response']:
-            print("Статистика за вчерашний день еще не доступна")
-            return {
-                'reach': 0,
-                'visitors': 0,
-                'views': 0,
-                'likes': 0,
-                'shares': 0,
-                'comments': 0
-            }
-            
-        return response['response'][0]
-    except Exception as e:
-        print(f"Ошибка при получении статистики: {e}")
-        return {}
-
-def get_group_info():
-    """Получение основной информации о сообществе"""
-    url = "https://api.vk.com/method/groups.getById"
-    params = {
-        "group_ids": GROUP_ID,
-        "fields": "name,description,members_count,photo_200,activity,site",
-        "access_token": VK_API_KEY,
-        "v": VK_API_VERSION
-    }
-    try:
-        response = requests.get(url, params=params).json()
-        if 'error' in response:
-            print(f"Ошибка VK API: {response['error']['error_msg']}")
-            return {}
-        return response["response"][0] if response.get("response") else {}
-    except Exception as e:
-        print(f"Ошибка при получении информации о группе: {e}")
-        return {}
-
 def generate_readme(info, stats):
-    """Генерация README.md с актуальными данными"""
+    """Генерация README.md с профессиональным дизайном"""
     update_time = datetime.now().strftime('%d.%m.%Y %H:%M')
     
     # Форматирование описания
@@ -73,39 +10,68 @@ def generate_readme(info, stats):
     members_count = info.get('members_count', 0)
     formatted_members = f"{members_count:,}".replace(',', ' ')
     
-    return f"""# {info.get('name', 'Net Present Value')} - Статистика сообщества
-
-![Аватар сообщества]({info.get('photo_200', '')})
-
-**Описание**:  
-{description}
-
-**Категория**: {info.get('activity', 'Финансы и инвестиции')}
-
-**Участники**: {formatted_members}
-
-**Сайт сообщества**: [vk.link/netpresentvalue](https://vk.link/netpresentvalue)
-
-## Статистика на {update_time}
-
-| Показатель   | Значение |
-|--------------|----------|
-| Охват        | {stats.get('reach', 0)} |
-| Посетители   | {stats.get('visitors', 0)} |
-| Просмотры    | {stats.get('views', 0)} |
-| Лайки        | {stats.get('likes', 0)} |
-| Репосты      | {stats.get('shares', 0)} |
-| Комментарии  | {stats.get('comments', 0)} |
-
-> Данные обновляются автоматически через GitHub Actions
+    # SVG разделитель
+    separator_svg = """
+<svg width="100%" height="20" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="2" fill="#0d1117" />
+  <rect y="18" width="100%" height="2" fill="#0d1117" />
+  <path d="M0 10 Q 50 15, 100 10 T 200 10" stroke="#58a6ff" stroke-width="2" fill="none" />
+</svg>
 """
+    
+    # Форматирование статистики
+    def format_stat(value, label, color):
+        return f"![{label}](https://img.shields.io/badge/{label.replace(' ', '_')}-{value}-{color}?style=flat-square&logo=github)"
+    
+    return f"""# 🚀 {info.get('name', 'Net Present Value')} - Профессиональная аналитика
 
-if __name__ == "__main__":
-    group_info = get_group_info()
-    group_stats = get_group_stats()
-    
-    # Генерация README
-    with open("README.md", "w", encoding="utf-8") as f:
-        f.write(generate_readme(group_info, group_stats))
-    
-    print("README успешно обновлен!")
+{separator_svg}
+
+<div align="center">
+  <img src="{info.get('photo_200', '')}" alt="Логотип сообщества" width="200">
+</div>
+
+## 📌 Основная информация
+
+> **Описание**:  
+> {description}
+
+| Характеристика      | Значение                          |
+|---------------------|-----------------------------------|
+| **🏷️ Категория**   | `{info.get('activity', 'Финансы и инвестиции')}` |
+| **👥 Участники**    | `{formatted_members}`             |
+| **🌐 Сайт**         | [vk.link/netpresentvalue](https://vk.link/netpresentvalue) |
+
+{separator_svg}
+
+## 📊 Статистика сообщества
+
+<div align="center">
+
+{format_stat(stats.get('reach', 0), 'Охват', 'blue')}
+{format_stat(stats.get('visitors', 0), 'Посетители', 'orange')}
+{format_stat(stats.get('views', 0), 'Просмотры', 'green')}
+
+{format_stat(stats.get('likes', 0), 'Лайки', 'red')}
+{format_stat(stats.get('shares', 0), 'Репосты', 'violet')}
+{format_stat(stats.get('comments', 0), 'Комментарии', 'yellow')}
+
+</div>
+
+{separator_svg}
+
+## ⚙️ Техническая информация
+
+- **Последнее обновление**: {update_time}
+- **Источник данных**: VK API
+- **Автоматизация**: GitHub Actions
+- **Частота обновления**: Ежедневно
+
+> **💡 Разработано IT-специалистами**  
+> [![GitHub](https://img.shields.io/badge/GitHub-Repo-brightgreen?logo=github)](https://github.com/rucryptowhale/VK-NPV)
+> [![VK](https://img.shields.io/badge/VK-Community-blue?logo=vk)](https://vk.com/netpresentvalue)
+
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=435&lines=Powered+by+GitHub+Actions;Professional+Analytics;Data+Driven+Decisions" alt="Typing SVG" />
+</div>
+"""
